@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Wedding Album</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   ✏️  QUICK EDIT GUIDE
+   1. Put your photos in the SAME FOLDER as this file, named
+      1.jpg, 2.jpg, 3.jpg, 4.jpg ... in chronological order.
+   2. Scroll to the bottom <script> and set TOTAL_PHOTOS to
+      how many photos you have (e.g. 42).
+   3. If your files are .jpeg or .png, change FILE_EXTS below.
+   4. Edit the couple's names / date / closing note further
+      down in the HTML (search for "EDIT ME").
+
+   The gallery below is a true masonry: each photo keeps its own
+   natural aspect ratio (nothing is cropped or stretched) and is
+   dropped into whichever column is currently shortest, so the
+   whole collage settles like cobbled stones — snug, unpadded,
+   and visually balanced — no matter what mix of portrait and
+   landscape shots you give it.
+   ============================================================ */
+
+:root{
+  --ivory:      #FBF6F0;
+  --blush:      #F5E6E0;
+  --rose:       #D9A9A0;
+  --sage:       #A9B89A;
+  --gold:       #C6A15B;
+  --ink:        #4A3F38;
+  --ink-soft:   #8B7D74;
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+
+html{ scroll-behavior: smooth; }
+
+body{
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+::selection{ background: var(--rose); color: #fff; }
+
+/* ---------- Hero ---------- */
+
+.hero{
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--blush) 0%, var(--ivory) 100%);
+}
+
+.hero-img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92) brightness(1.02);
+}
+
+.hero-veil{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(74,63,56,0.05) 0%, rgba(74,63,56,0.15) 55%, rgba(74,63,56,0.55) 100%);
+}
+
+.hero-content{
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  padding: 0 24px 8vh;
+  max-width: 800px;
+}
+
+.hero-eyebrow{
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 18px;
+}
+
+.hero-names{
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(48px, 9vw, 108px);
+  line-height: 1.05;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.25);
+}
+
+.hero-amp{
+  display: block;
+  font-size: 0.55em;
+  color: #F0DCC8;
+  margin: 4px 0;
+}
+
+.hero-date{
+  margin-top: 22px;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.hero-rule{
+  width: 46px;
+  height: 1px;
+  background: #F0DCC8;
+  margin: 20px auto 0;
+  opacity: 0.9;
+}
+
+.scroll-cue{
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 1px;
+  height: 46px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0));
+  animation: cue 2.2s ease-in-out infinite;
+}
+@keyframes cue{
+  0%{ transform: translateX(-50%) scaleY(0.4); opacity: 0.3; transform-origin: top; }
+  50%{ transform: translateX(-50%) scaleY(1); opacity: 1; transform-origin: top; }
+  100%{ transform: translateX(-50%) scaleY(0.4); opacity: 0.3; transform-origin: top; }
+}
+
+/* ---------- Intro note ---------- */
+
+.intro{
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 110px 28px 70px;
+  text-align: center;
+}
+
+.intro p{
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.intro .typing-text{
+  display: inline-block;
+  min-height: 1.6em;
+  white-space: pre-wrap;
+}
+
+.intro .typing-text::after{
+  content: '|';
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--gold);
+  animation: blink 0.8s steps(1) infinite;
+}
+
+.intro .typing-text.finished::after{
+  display: none;
+}
+
+@keyframes blink{
+  50%{ opacity: 0; }
+}
+
+.divider{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 34px auto 0;
+  width: 100%;
+  max-width: 220px;
+}
+.divider .line{ flex:1; height:1px; background: var(--gold); opacity: 0.5; }
+.divider .dot{ width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+
+/* ---------- Gallery (balanced, no-crop masonry) ---------- */
+
+.gallery-wrap{
+  padding: 0 20px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.gallery{
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.g-col{
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.g-item{
+  position: relative;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--blush);
+  box-shadow: 0 1px 3px rgba(74,63,56,0.08);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.g-item.in-view{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.g-item img,
+ .hero-img,
+ .closing-img{
+  display: block;
+  width: 100%;
+  height: auto;   /* keeps the photo's real aspect ratio — nothing is cut */
+  transition: transform 0.6s ease;
+  cursor: zoom-in;
+}
+
+.g-item:hover img{
+  transform: scale(1.035);
+}
+
+.lightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 10, 10, 0.9);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.lightbox.open{
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox img{
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.35);
+}
+
+.lightbox-close{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  color: #222;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.g-num{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  background: rgba(255,255,255,0.82);
+  padding: 4px 9px;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+@media (max-width: 720px){
+  .gallery{ gap: 10px; }
+  .g-col{ gap: 10px; }
+}
+
+/* ---------- Closing ---------- */
+
+.closing{
+  position: relative;
+  margin-top: 30px;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.closing-img{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.92);
+}
+
+.closing-veil{
+  position: absolute;
+  inset: 0;
+  background: rgba(74,63,56,0.42);
+}
+
+.closing-content{
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.closing-content p{
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(24px, 4vw, 40px);
+  line-height: 1.4;
+  max-width: 680px;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.25);
+}
+
+.closing-content .signoff{
+  margin-top: 22px;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+footer{
+  text-align: center;
+  padding: 34px 20px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <img class="hero-img" src="1.jpg" alt="First photo" onerror="this.onerror=null; this.style.display='none';">
+  <div class="hero-veil"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">A Wedding Story</div>
+    <!-- EDIT ME: couple's names -->
+    <h1 class="hero-names">Iresh<span class="hero-amp">&amp;</span>Marjun</h1>
+    <div class="hero-rule"></div>
+    <!-- EDIT ME: date / location -->
+    <div class="hero-date">June 22, 2026 · Nuestra Señora del Pilar Parish</div>
+  </div>
+  <div class="scroll-cue"></div>
+</section>
+
+<section class="intro">
+  <!-- EDIT ME: a short opening note, or delete this section -->
+  <p><span class="typing-text" id="typing-text"></span></p>
+  <div class="divider"><span class="line"></span><span class="dot"></span><span class="line"></span></div>
+</section>
+
+<div class="gallery-wrap">
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<section class="closing">
+  <img class="closing-img" id="closing-img" src="" alt="Closing photo">
+  <div class="closing-veil"></div>
+  <div class="closing-content">
+    <!-- EDIT ME: closing note -->
+    <p>"Thank you for being part of our story, from the very first chapter to this one."</p>
+    <div class="signoff">Iresh &amp; Marjun</div>
+  </div>
+</section>
+
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button class="lightbox-close" aria-label="Close full view">&times;</button>
+  <img id="lightbox-img" alt="Full view">
+</div>
+
+<footer>With love — thank you for celebrating with us</footer>
+
+<script>
+  /* ====== CONFIG — edit these two lines ====== */
+  const TOTAL_PHOTOS = 350;  // how many numbered photos you have in total
+  const FILE_EXTS = ['jpg', 'jpeg', 'png'];
+  /* ============================================ */
+
+  const galleryEl = document.getElementById('gallery');
+  const typingText = document.getElementById('typing-text');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxClose = document.querySelector('.lightbox-close');
+
+  function openLightbox(src){
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  const introText = '"It was never about capturing a perfect picture. It was about finding the person whose rough edges and messy brushstrokes finally made sense next to mine."';
+
+  function typeIntroText(){
+    let index = 0;
+    typingText.textContent = '';
+    typingText.classList.remove('finished');
+
+    const totalDuration = 10000;
+    const stepTime = totalDuration / introText.length;
+
+    const interval = setInterval(() => {
+      typingText.textContent += introText[index];
+      index += 1;
+      if (index >= introText.length){
+        clearInterval(interval);
+        typingText.classList.add('finished');
+      }
+    }, stepTime);
+  }
+
+  window.addEventListener('load', () => {
+    typeIntroText();
+  });
+
+  lightbox.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeLightbox();
+  });
+
+  // Resolve the first file extension that actually loads for a given index.
+  // Returns a promise of {index, src, ratio} where ratio = width / height,
+  // or null if no file was found for that index.
+  function loadPhoto(index){
+    return new Promise((resolve) => {
+      let attempt = 0;
+      const tryNext = () => {
+        if (attempt >= FILE_EXTS.length){
+          resolve(null);
+          return;
+        }
+        const src = index + '.' + FILE_EXTS[attempt];
+        attempt += 1;
+        const probe = new Image();
+        probe.onload = () => resolve({
+          index,
+          src,
+          ratio: probe.naturalWidth && probe.naturalHeight
+            ? probe.naturalWidth / probe.naturalHeight
+            : 1
+        });
+        probe.onerror = tryNext;
+        probe.src = src;
+      };
+      tryNext();
+    });
+  }
+
+  function columnCountForWidth(w){
+    if (w < 560) return 2;
+    if (w < 900) return 3;
+    if (w < 1300) return 4;
+    return 5;
+  }
+
+  // Distributes photos into N columns, always adding the next photo to
+  // whichever column is currently shortest (tracked as an aspect-ratio-based
+  // "height" at a fixed reference column width). This is what gives the
+  // cobblestone effect: every photo keeps its true proportions, and the
+  // columns settle out to roughly equal, balanced heights.
+  function buildMasonry(photos, columnCount){
+    galleryEl.innerHTML = '';
+    const cols = [];
+    const colHeights = new Array(columnCount).fill(0);
+    const REFERENCE_WIDTH = 400; // arbitrary shared unit for height comparison
+
+    for (let c = 0; c < columnCount; c++){
+      const col = document.createElement('div');
+      col.className = 'g-col';
+      galleryEl.appendChild(col);
+      cols.push(col);
+    }
+
+    photos.forEach((photo) => {
+      // shortest column gets the next photo
+      let shortest = 0;
+      for (let c = 1; c < columnCount; c++){
+        if (colHeights[c] < colHeights[shortest]) shortest = c;
+      }
+
+      const item = document.createElement('div');
+      item.className = 'g-item';
+
+      const img = document.createElement('img');
+      img.src = photo.src;
+      img.alt = 'Photo ' + photo.index;
+      img.loading = 'lazy';
+      img.addEventListener('click', () => openLightbox(photo.src));
+
+      const num = document.createElement('span');
+      num.className = 'g-num';
+      num.textContent = String(photo.index).padStart(2, '0');
+
+      item.appendChild(img);
+      item.appendChild(num);
+      cols[shortest].appendChild(item);
+
+      colHeights[shortest] += REFERENCE_WIDTH / (photo.ratio || 1);
+    });
+
+    // fade-in as items enter the viewport
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.g-item').forEach(el => observer.observe(el));
+  }
+
+  // Hero uses photo 1.
+  loadPhoto(1).then((photo) => {
+    const heroImg = document.querySelector('.hero-img');
+    if (photo){
+      heroImg.src = photo.src;
+      heroImg.addEventListener('click', () => openLightbox(heroImg.src));
+    } else {
+      heroImg.style.display = 'none';
+    }
+  });
+
+  // Gallery uses photos 2 through TOTAL_PHOTOS. We resolve every photo's
+  // real dimensions up front, then lay the whole collage out in one pass
+  // so columns balance correctly from the start (no reflow jank).
+  const indices = [];
+  for (let i = 2; i <= TOTAL_PHOTOS; i++) indices.push(i);
+
+  Promise.all(indices.map(loadPhoto)).then((results) => {
+    const photos = results.filter(Boolean); // drop any missing files
+
+    let currentColumnCount = columnCountForWidth(window.innerWidth);
+    buildMasonry(photos, currentColumnCount);
+
+    // rebuild on resize (debounced) so the collage re-balances at new widths
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const nextCount = columnCountForWidth(window.innerWidth);
+        if (nextCount !== currentColumnCount){
+          currentColumnCount = nextCount;
+          buildMasonry(photos, currentColumnCount);
+        }
+      }, 200);
+    });
+
+    // Closing section reuses the last successfully-loaded photo as a bookend.
+    const closingImg = document.getElementById('closing-img');
+    if (photos.length){
+      closingImg.src = photos[photos.length - 1].src;
+      closingImg.addEventListener('click', () => openLightbox(closingImg.src));
+    } else {
+      closingImg.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
