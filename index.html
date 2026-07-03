@@ -275,10 +275,16 @@ body{
   box-shadow: 0 16px 60px rgba(0,0,0,0.35);
 }
 
-.lightbox-close{
+.lightbox-controls {
   position: absolute;
   top: 18px;
   right: 18px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.lightbox-btn {
   border: 0;
   width: 42px;
   height: 42px;
@@ -287,6 +293,22 @@ body{
   color: #222;
   font-size: 24px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.lightbox-btn:hover {
+  transform: scale(1.05);
+  background: #fff;
+}
+
+.lightbox-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
 .g-num{
@@ -409,7 +431,12 @@ footer{
 </section>
 
 <div id="lightbox" class="lightbox" aria-hidden="true">
-  <button class="lightbox-close" aria-label="Close full view">&times;</button>
+  <div class="lightbox-controls">
+    <a id="lightbox-download" class="lightbox-btn" download aria-label="Download photo">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </a>
+    <button class="lightbox-close lightbox-btn" aria-label="Close full view">&times;</button>
+  </div>
   <img id="lightbox-img" alt="Full view">
 </div>
 
@@ -426,9 +453,11 @@ footer{
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxClose = document.querySelector('.lightbox-close');
+  const lightboxDownload = document.getElementById('lightbox-download');
 
   function openLightbox(src){
     lightboxImg.src = src;
+    lightboxDownload.href = src;
     lightbox.classList.add('open');
     lightbox.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -513,56 +542,61 @@ footer{
   // "height" at a fixed reference column width). This is what gives the
   // cobblestone effect: every photo keeps its true proportions, and the
   // columns settle out to roughly equal, balanced heights.
-  function buildMasonry(photos, columnCount){
-    galleryEl.innerHTML = '';
-    const cols = [];
-    const colHeights = new Array(columnCount).fill(0);
-    const REFERENCE_WIDTH = 400; // arbitrary shared unit for height comparison
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
 
+  let cols = [];
+  let colHeights = [];
+  const REFERENCE_WIDTH = 400; // arbitrary shared unit for height comparison
+
+  function initMasonry(columnCount) {
+    galleryEl.innerHTML = '';
+    cols = [];
+    colHeights = new Array(columnCount).fill(0);
     for (let c = 0; c < columnCount; c++){
       const col = document.createElement('div');
       col.className = 'g-col';
       galleryEl.appendChild(col);
       cols.push(col);
     }
+  }
 
-    photos.forEach((photo) => {
-      // shortest column gets the next photo
-      let shortest = 0;
-      for (let c = 1; c < columnCount; c++){
-        if (colHeights[c] < colHeights[shortest]) shortest = c;
-      }
+  function appendToMasonry(photo) {
+    let shortest = 0;
+    for (let c = 1; c < cols.length; c++){
+      if (colHeights[c] < colHeights[shortest]) shortest = c;
+    }
 
-      const item = document.createElement('div');
-      item.className = 'g-item';
+    const item = document.createElement('div');
+    item.className = 'g-item';
 
-      const img = document.createElement('img');
-      img.src = photo.src;
-      img.alt = 'Photo ' + photo.index;
-      img.loading = 'lazy';
-      img.addEventListener('click', () => openLightbox(photo.src));
+    const img = document.createElement('img');
+    img.src = photo.src;
+    img.alt = 'Photo ' + photo.index;
+    img.loading = 'lazy';
+    img.addEventListener('click', () => openLightbox(photo.src));
 
-      const num = document.createElement('span');
-      num.className = 'g-num';
-      num.textContent = String(photo.index).padStart(2, '0');
+    const num = document.createElement('span');
+    num.className = 'g-num';
+    num.textContent = String(photo.index).padStart(2, '0');
 
-      item.appendChild(img);
-      item.appendChild(num);
-      cols[shortest].appendChild(item);
+    item.appendChild(img);
+    item.appendChild(num);
+    cols[shortest].appendChild(item);
 
-      colHeights[shortest] += REFERENCE_WIDTH / (photo.ratio || 1);
-    });
+    colHeights[shortest] += REFERENCE_WIDTH / (photo.ratio || 1);
+    observer.observe(item);
+  }
 
-    // fade-in as items enter the viewport
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting){
-          entry.target.classList.add('in-view');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.g-item').forEach(el => observer.observe(el));
+  function buildMasonry(photos, columnCount){
+    initMasonry(columnCount);
+    photos.forEach(appendToMasonry);
   }
 
   // Hero uses photo 1.
@@ -576,30 +610,25 @@ footer{
     }
   });
 
-  // Gallery uses photos 2 through TOTAL_PHOTOS. We resolve every photo's
-  // real dimensions up front, then lay the whole collage out in one pass
-  // so columns balance correctly from the start (no reflow jank).
-  const indices = [];
-  for (let i = 2; i <= TOTAL_PHOTOS; i++) indices.push(i);
+  const photos = [];
+  let currentColumnCount = columnCountForWidth(window.innerWidth);
+  initMasonry(currentColumnCount);
 
-  Promise.all(indices.map(loadPhoto)).then((results) => {
-    const photos = results.filter(Boolean); // drop any missing files
-
-    let currentColumnCount = columnCountForWidth(window.innerWidth);
-    buildMasonry(photos, currentColumnCount);
-
-    // rebuild on resize (debounced) so the collage re-balances at new widths
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const nextCount = columnCountForWidth(window.innerWidth);
-        if (nextCount !== currentColumnCount){
-          currentColumnCount = nextCount;
-          buildMasonry(photos, currentColumnCount);
+  async function loadGallery() {
+    const batchSize = 12; // Load in small batches so the page renders progressively
+    for (let i = 2; i <= TOTAL_PHOTOS; i += batchSize) {
+      const batchPromises = [];
+      for (let j = i; j < i + batchSize && j <= TOTAL_PHOTOS; j++) {
+        batchPromises.push(loadPhoto(j));
+      }
+      const results = await Promise.all(batchPromises);
+      for (const photo of results) {
+        if (photo) {
+          photos.push(photo);
+          appendToMasonry(photo);
         }
-      }, 200);
-    });
+      }
+    }
 
     // Closing section reuses the last successfully-loaded photo as a bookend.
     const closingImg = document.getElementById('closing-img');
@@ -609,6 +638,21 @@ footer{
     } else {
       closingImg.style.display = 'none';
     }
+  }
+
+  loadGallery();
+
+  // rebuild on resize (debounced) so the collage re-balances at new widths
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const nextCount = columnCountForWidth(window.innerWidth);
+      if (nextCount !== currentColumnCount){
+        currentColumnCount = nextCount;
+        buildMasonry(photos, currentColumnCount);
+      }
+    }, 200);
   });
 </script>
 
